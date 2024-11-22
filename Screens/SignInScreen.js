@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, TextInput, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, StyleSheet, Alert, ImageBackground } from "react-native";
 import { Button } from "@rneui/themed";
 import { useDispatch } from "react-redux";
 import { signIn, signUp, subscribeToAuthChanges } from "../AuthManager";
@@ -43,8 +43,10 @@ function SigninBox({ navigation }) {
           />
         </View>
       </View>
-      <View style={styles.loginRow}>
+      <View style={styles.loginButtonRow}>
         <Button
+          titleStyle={styles.loginButtonText}
+          buttonStyle={styles.loginButton}
           onPress={async () => {
             try {
               await signIn(email, password);
@@ -119,8 +121,10 @@ function SignupBox({ navigation }) {
           />
         </View>
       </View>
-      <View style={styles.loginRow}>
+      <View style={styles.loginButtonRow}>
         <Button
+          titleStyle={styles.loginButtonText}
+          buttonStyle={styles.loginButton}
           onPress={async () => {
             try {
               const newUser = await signUp(displayName, email, password);
@@ -145,13 +149,18 @@ function SignInScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <ImageBackground
+        source={require('../assets/FitPath.png')}
+        style={styles.headerContainer}
+      >
+        <Text style={styles.headerText}>FitPath</Text>
+      </ImageBackground>
       <View style={styles.bodyContainer}>
         {loginMode ? (
           <SigninBox navigation={navigation} />
         ) : (
           <SignupBox navigation={navigation} />
         )}
-      </View>
       <View styles={styles.modeSwitchContainer}>
         {loginMode ? (
           <Text>
@@ -160,7 +169,7 @@ function SignInScreen({ navigation }) {
               onPress={() => {
                 setLoginMode(!loginMode);
               }}
-              style={{ color: "blue" }}
+              style={{ color: "#574AD6" }}
             >
               {" "}
               Sign up{" "}
@@ -174,7 +183,7 @@ function SignInScreen({ navigation }) {
               onPress={() => {
                 setLoginMode(!loginMode);
               }}
-              style={{ color: "blue" }}
+              style={{ color: "#574AD6" }}
             >
               {" "}
               Sign in{" "}
@@ -182,6 +191,7 @@ function SignInScreen({ navigation }) {
             instead!
           </Text>
         )}
+      </View>
       </View>
     </View>
   );
@@ -192,19 +202,35 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
   },
-  bodyContainer: {
-    flex: 0.5,
+  headerContainer: {
+    flex: 0.25,
+    width: "100%",
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#ccc",
+    overflow: "hidden",
+  },
+  headerText: {
+    color: 'white',
+    fontSize: 30,
+    fontWeight: 'bold',
+    paddingTop: "20%",
+  },
+  bodyContainer: {
+    flex: 0.6,
+    width: "80%",
+    justifyContent: "flex-start",
+    alignItems: "center",
+
   },
   loginContainer: {
     flex: 1,
-    justifyContent: "flex-start",
     alignItems: "center",
+    justifyContent: "flex-start",
     width: "100%",
-    paddingTop: "30%",
+    paddingTop: "10%",
     paddingBottom: "10%",
   },
   loginHeader: {
@@ -214,27 +240,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loginHeaderText: {
-    fontSize: 24,
+    fontSize: 18,
     color: "black",
+    fontWeight: "bold",
     paddingBottom: "5%",
   },
   loginRow: {
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "flex-start",
-    alignItems: "center",
     width: "100%",
-    padding: "3%",
+    paddingBottom: "4%",
   },
   loginLabelContainer: {
-    flex: 0.3,
     justifyContent: "center",
-    alignItems: "flex-end",
+    width: "50%",
+    paddingVertical: "2%",
   },
   loginLabelText: {
-    fontSize: 18,
+    fontSize: 16,
   },
   loginInputContainer: {
-    flex: 0.5,
     justifyContent: "center",
     alignItems: "flex-start",
     width: "100%",
@@ -244,20 +269,28 @@ const styles = StyleSheet.create({
     borderColor: "lightgray",
     borderWidth: 1,
     borderRadius: 6,
-    fontSize: 18,
+    fontSize: 16,
     padding: "2%",
   },
   modeSwitchContainer: {
     flex: 0.2,
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    backgroundColor: "pink",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    width: "10%",
   },
   loginButtonRow: {
     width: "100%",
     justifyContent: "center",
-    alignItems: "center",
+    marginTop: "8%",
+  },
+  loginButton: {
+    width: "100%",
+    backgroundColor: "#7266E2",
+    borderRadius: 6,
+  },
+  loginButtonText: {
+    color: "white",
+    fontSize: 16,
   },
   listContainer: {
     flex: 0.7,
