@@ -7,23 +7,21 @@ import { Icon } from "@rneui/themed";
 import AuthSlice from "./features/AuthSlice";
 import SignInScreen from "./Screens/SignInScreen";
 import HomeScreen from "./Screens/HomeScreen";
+import HomeEditScreen from "./Screens/HomeEditScreen";
+import HomeDetailScreen from "./Screens/HomeDetailScreen";
 import ProfileScreen from "./Screens/ProfileScreen";
 
-const store = configureStore({
-  reducer: {
-    AuthSlice,
-  },
-});
+import store from './app/store';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function HomeTabs() {
+function MainTabs() {
   return (
     <Tab.Navigator>
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={HomeStack}
         options={{
           headerShown: false,
           tabBarIcon: ({ focused, color, size }) => {
@@ -51,6 +49,22 @@ function HomeTabs() {
   );
 }
 
+function HomeStack() {
+
+  return (
+    <Stack.Navigator
+      initialRouteName="HomeScreen"
+      screenOptions={{
+        headerShown: false, // Hide the default header
+      }}
+    >
+      <Stack.Screen name='HomeScreen' component={HomeScreen} />
+      <Stack.Screen name='HomeEditScreen' component={HomeEditScreen}/>
+      <Stack.Screen name='HomeDetailScreen' component={HomeDetailScreen}/>
+    </Stack.Navigator>
+  );
+}
+
 function App() {
   return (
     <Provider store={store}>
@@ -60,7 +74,7 @@ function App() {
           screenOptions={{ headerShown: false }}
         >
           <Stack.Screen name="Signin" component={SignInScreen} />
-          <Stack.Screen name="HomeTabs" component={HomeTabs} />
+          <Stack.Screen name="MainTabs" component={MainTabs} />
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>
