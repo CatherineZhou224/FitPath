@@ -31,8 +31,6 @@ export const authSlice = createSlice({
   initialState: {
     users: [],
   },
-  // reducers is a mandatory argument even if all of our reducers
-  // are in extraReducers
   reducers: [],
   extraReducers: (builder) => {
     builder.addCase(addUser.fulfilled, (state, action) => {

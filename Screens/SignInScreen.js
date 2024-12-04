@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { View, Text, TextInput, StyleSheet, Alert, ImageBackground } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Alert,
+  ImageBackground,
+} from "react-native";
 import { Button } from "@rneui/themed";
 import { useDispatch } from "react-redux";
 import { signIn, signUp, subscribeToAuthChanges } from "../AuthManager";
@@ -50,7 +57,6 @@ function SigninBox({ navigation }) {
           onPress={async () => {
             try {
               await signIn(email, password);
-              // navigation.navigate('Home');
             } catch (error) {
               Alert.alert(
                 "You Were Unable to Get in",
@@ -150,7 +156,7 @@ function SignInScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require('../assets/FitPath.png')}
+        source={require("../assets/FitPath.png")}
         style={styles.headerContainer}
       >
         <Text style={styles.headerText}>FitPath</Text>
@@ -161,37 +167,37 @@ function SignInScreen({ navigation }) {
         ) : (
           <SignupBox navigation={navigation} />
         )}
-      <View styles={styles.modeSwitchContainer}>
-        {loginMode ? (
-          <Text>
-            New user?
-            <Text
-              onPress={() => {
-                setLoginMode(!loginMode);
-              }}
-              style={{ color: "#574AD6" }}
-            >
-              {" "}
-              Sign up{" "}
+        <View styles={styles.modeSwitchContainer}>
+          {loginMode ? (
+            <Text>
+              New user?
+              <Text
+                onPress={() => {
+                  setLoginMode(!loginMode);
+                }}
+                style={{ color: "#574AD6" }}
+              >
+                {" "}
+                Sign up{" "}
+              </Text>
+              instead!
             </Text>
-            instead!
-          </Text>
-        ) : (
-          <Text>
-            Returning user?
-            <Text
-              onPress={() => {
-                setLoginMode(!loginMode);
-              }}
-              style={{ color: "#574AD6" }}
-            >
-              {" "}
-              Sign in{" "}
+          ) : (
+            <Text>
+              Returning user?
+              <Text
+                onPress={() => {
+                  setLoginMode(!loginMode);
+                }}
+                style={{ color: "#574AD6" }}
+              >
+                {" "}
+                Sign in{" "}
+              </Text>
+              instead!
             </Text>
-            instead!
-          </Text>
-        )}
-      </View>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -213,9 +219,9 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   headerText: {
-    color: 'white',
+    color: "white",
     fontSize: 30,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     paddingTop: "20%",
   },
   bodyContainer: {
@@ -223,7 +229,6 @@ const styles = StyleSheet.create({
     width: "80%",
     justifyContent: "flex-start",
     alignItems: "center",
-
   },
   loginContainer: {
     flex: 1,
