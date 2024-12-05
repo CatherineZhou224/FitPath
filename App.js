@@ -24,6 +24,7 @@ function MainTabs() {
         component={HomeStack}
         options={{
           headerShown: false,
+          tabBarActiveTintColor: "#7266E2",
           tabBarIcon: ({ focused, color, size }) => {
             return (
               <Icon
@@ -40,6 +41,7 @@ function MainTabs() {
         name="Profile"
         component={ProfileScreen}
         options={{
+          tabBarActiveTintColor: "#7266E2",
           tabBarIcon: ({ focused, color, size }) => {
             return <Icon name="people" color={color} size={size} />;
           },

@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Icon } from '@rneui/themed';
-import { useSelector } from 'react-redux';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { Icon, Button } from '@rneui/themed';
+import { useSelector, useDispatch } from 'react-redux';
+import { deleteWorkoutThunk } from "../features/workoutsSlice";
+import moment from 'moment';
+import imageNotAvailable from '../assets/FitPath.png';
 
 function HomeDetailsScreen(props) {
+  const dispatch = useDispatch();
   const { navigation, route } = props;
   const { item } = route.params;
 
@@ -22,69 +26,90 @@ function HomeDetailsScreen(props) {
     }
   }, [updatedWorkout]);
 
+  // Function to format the duration
+  const formatDuration = (duration) => {
+    if (!duration) {
+      return "";
+    } else if (duration < 60) {
+      return `${duration} min`;
+    } else {
+      const hours = Math.floor(duration / 60);
+      const minutes = duration % 60;
+      return `${hours} hr${minutes > 0 ? ` ${minutes} min` : ''}`;
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.headerContainer}>
-        <Text style={styles.backButton} onPress={() => navigation.goBack()}>{"< Back"}</Text>
-        <View style={styles.headerInfo}>
-          <Text style={styles.headerTitle}>Workout Details</Text>
-        </View>
-        <Text
-          style={styles.editButton}
-          onPress={() => navigation.navigate('HomeEditScreen', { item: workout })}
-        >
-          Edit
-        </Text>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" type="material" color="#7266E2" size={24} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Detail</Text>
       </View>
 
       {/* Details Section */}
       <ScrollView contentContainerStyle={styles.detailsContainer}>
-        {/* Workout Type */}
-        <View style={styles.detailRow}>
-          <View style={styles.detailTitle}>
-            <Icon name="fitness-center" type="material" color="black" style={styles.detailIcon} />
-            <Text style={styles.detailLabel}>Workout Type</Text>
-          </View>
-          <Text style={styles.detailValue}>{workout.workoutType || ""}</Text>
+         {/* Workout Image */}
+      <Image
+        source={workout.image ? { uri: workout.image } : imageNotAvailable}
+        style={styles.workoutImage}
+      />
+        <Text style={styles.workoutTitle}>Workout {workout.workoutType}</Text>
+
+        {/* Workout Details */}
+        <View style={styles.detailCard}>
+          <Text style={styles.detailLabel}>Start time</Text>
+          <Text style={styles.detailValue}>
+            {workout.startTime ? moment(workout.startTime).format('MMM DD, HH:mm') : ""}
+          </Text>
         </View>
 
-        {/* Start Time */}
-        <View style={styles.detailRow}>
-          <View style={styles.detailTitle}>
-            <Icon name="schedule" type="material" color="black" style={styles.detailIcon} />
-            <Text style={styles.detailLabel}>Start Time</Text>
-          </View>
-          <Text style={styles.detailValue}>{workout.startTime || ""}</Text>
+        <View style={styles.detailCard}>
+          <Text style={styles.detailLabel}>Duration</Text>
+          <Text style={styles.detailValue}>{formatDuration(workout.duration)}</Text>
         </View>
 
-        {/* Duration */}
-        <View style={styles.detailRow}>
-          <View style={styles.detailTitle}>
-            <Icon name="timer" type="material" color="black" style={styles.detailIcon} />
-            <Text style={styles.detailLabel}>Duration</Text>
-          </View>
-          <Text style={styles.detailValue}>{workout.duration ? `${workout.duration} min` : ""}</Text>
-        </View>
-
-        {/* Calories Burned */}
-        <View style={styles.detailRow}>
-          <View style={styles.detailTitle}>
-            <Icon name="local-fire-department" type="material" color="black" style={styles.detailIcon} />
-            <Text style={styles.detailLabel}>Calories Burned</Text>
-          </View>
+        <View style={styles.detailCard}>
+          <Text style={styles.detailLabel}>Calories burned</Text>
           <Text style={styles.detailValue}>{workout.calories ? `${workout.calories} cal` : ""}</Text>
         </View>
 
         {/* Location */}
-        <View style={styles.detailRow}>
-          <View style={styles.detailTitle}>
-            <Icon name="location-on" type="material" color="black" style={styles.detailIcon} />
-            <Text style={styles.detailLabel}>Location</Text>
-          </View>
-          <Text style={styles.detailValue}>{workout.location || ""}</Text>
+        <View style={styles.locationContainer}>
+          <Icon name="location-on" type="material" color="black" />
+          <Text style={styles.locationText}>{workout.location || "Location TBD"}</Text>
         </View>
       </ScrollView>
+        {/* Edit Button */}
+        <View style={styles.CRUDbuttonContainer}>
+        <Button
+          title="Edit"
+          buttonStyle={styles.editButton}
+          icon={{
+            name: "edit",
+            type: "material",
+            color: "white",
+          }}
+          onPress={() => navigation.navigate('HomeEditScreen', { item: workout })}
+        />
+
+        {/* Delete Button */}
+        <Button
+          title="Delete"
+          buttonStyle={styles.deleteButton}
+          icon={{
+            name: "delete",
+            type: "material",
+            color: "white",
+          }}
+          onPress={() => {
+            dispatch(deleteWorkoutThunk(item.key));
+            navigation.goBack();
+          }}
+        />
+        </View>
     </View>
   );
 }
@@ -92,59 +117,91 @@ function HomeDetailsScreen(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
   },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 50,
     paddingBottom: 20,
-    backgroundColor: '#AFD8E9'
+    backgroundColor: 'white',
   },
   backButton: {
-    color: 'blue',
-    fontSize: 16
-  },
-  headerInfo: {
-    alignItems: 'center'
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#7266E2',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold'
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginLeft: 20,
   },
-  editButton: {
-    color: 'blue',
-    fontSize: 16
+  workoutImage: {
+    width: '100%',
+    height: 150,
+    resizeMode: 'cover',
+    marginBottom: 20,
   },
   detailsContainer: {
     paddingHorizontal: 20,
   },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 15
+  workoutTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 20,
   },
-  detailTitle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 0.4,
-  },
-  detailIcon: {
-    marginRight: 10
+  detailCard: {
+    backgroundColor: '#EDEDED',
+    borderRadius: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    marginBottom: 15,
   },
   detailLabel: {
     fontWeight: 'bold',
-    fontSize: 14,
-    width: 120
+    fontSize: 16,
+    color: '#333',
   },
   detailValue: {
-    flex: 0.6,
-    fontSize: 14,
-    color: '#555',
-    marginLeft: 10
-  }
+    fontSize: 16,
+    color: '#333',
+    marginTop: 5,
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 15,
+  },
+  locationText: {
+    fontSize: 16,
+    color: '#333',
+    marginLeft: 10,
+  },
+  CRUDbuttonContainer: {
+    backgroundColor: 't',
+  },
+
+  editButton: {
+    position: 'fixed',
+    backgroundColor: '#7266E2',
+    borderRadius: 10,
+    paddingVertical: '3%',
+    marginBottom: '3%',
+    marginHorizontal: '3%',
+  },
+  deleteButton: {
+    position: 'fixed',
+    backgroundColor: 'black',
+    borderRadius: 10,
+    paddingVertical: '3%',
+    marginBottom: '3%',
+    marginHorizontal: '3%',
+  },
 });
 
 export default HomeDetailsScreen;

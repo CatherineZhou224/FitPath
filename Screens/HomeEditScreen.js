@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { Input, Icon, Button } from '@rneui/themed';
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
+import { Input, Icon, Button, BottomSheet } from '@rneui/themed';
 import { useDispatch } from 'react-redux';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { addWorkoutThunk, updateWorkoutThunk } from "../features/workoutsSlice";
@@ -57,12 +57,9 @@ function HomeEditScreen(props) {
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.headerContainer}>
-          <Icon
-            name="arrow-back"
-            type="material"
-            color="black"
-            onPress={() => navigation.goBack()}
-          />
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" type="material" color="#7266E2" size={24} />
+        </TouchableOpacity>
           <Text style={styles.headerTitle}>{item.key === -1 ? 'Add Workout' : 'Edit Workout'}</Text>
         </View>
 
@@ -74,8 +71,8 @@ function HomeEditScreen(props) {
           <View style={styles.captureContainer}>
             <Text style={styles.captureText}>Capture your workout moment</Text>
             <Icon
-              name="camera-alt"
-              type="material"
+              name="camera-plus"
+              type="material-community"
               color="black"
               onPress={() => {
                 // Placeholder for image capture logic
@@ -156,19 +153,18 @@ function HomeEditScreen(props) {
               }}
             />
           </View>
-
-          {/* Add Button */}
-          <Button
+        </ScrollView>
+        {/* Add Button */}
+        <Button
             title="Add"
             buttonStyle={styles.addButton}
             icon={{
-              name: "add",
+              name: "add-circle",
               type: "material",
               color: "white",
             }}
             onPress={handleSave}
           />
-        </ScrollView>
       </View>
     </KeyboardAvoidingView>
   );
@@ -187,10 +183,20 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     backgroundColor: 'white',
   },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#7266E2',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginLeft: 20,
+    marginLeft: '20%',
   },
   scrollViewContainer: {
     paddingHorizontal: 15,
@@ -250,10 +256,12 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   addButton: {
+    position: 'fixed',
     backgroundColor: '#7266E2',
     borderRadius: 10,
-    paddingVertical: 15,
-    paddingHorizontal: 20,
+    paddingVertical: '3%',
+    marginHorizontal: '3%',
+    marginBottom: '3%',
   },
 });
 
