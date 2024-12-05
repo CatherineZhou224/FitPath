@@ -1,19 +1,45 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { getAuthUser } from "../AuthManager";
+import { fetchGoal, addGoal, updateGoal } from "../features/userSlice";
 import { Button, Overlay, Icon, Input } from "@rneui/themed";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 function ProfileScreen({ navigation }) {
-  const [overlayVisible, setOverlayVisible] = useState(false);
-  const [inputText, setInputText] = useState(0);
-
   const dispatch = useDispatch();
-  //const goal = useSelector((state) => state.goal);
+  const userId = getAuthUser()?.uid;
 
-  //   useEffect(() => {
-  //     dispatch(fetchGaol());
-  //   }, []);
+  const goal = useSelector((state) => state.user?.personalGoal);
+  console.log("goal:", goal);
+
+  const [overlayVisible, setOverlayVisible] = useState(false);
+  const [inputText, setInputText] = useState("");
+
+  useEffect(() => {
+    if (userId) {
+      dispatch(fetchGoal(userId));
+    }
+  }, [dispatch, userId]);
+
+  const handleSaveGoal = () => {
+    if (goal) {
+      dispatch(
+        updateGoal({
+          userId,
+          updatedGoal: { ...goal, targetTime: inputText },
+        })
+      );
+      {
+        console.log("update");
+      }
+    } else {
+      dispatch(addGoal({ userId, goal: { targetTime: inputText } }));
+      {
+        console.log("add");
+      }
+    }
+    setOverlayVisible(false);
+  };
 
   return (
     <View style={styles.container}>
@@ -31,10 +57,13 @@ function ProfileScreen({ navigation }) {
         <TouchableOpacity>
           <Button
             onPress={() => {
+              setInputText(goal?.targetTime ?? "0");
               setOverlayVisible(true);
             }}
           >
-            <Text>Add Goal</Text>
+            <Text>
+              {goal ? `Edit Goal: ${goal.targetTime} hrs/week` : "Add Goal"}
+            </Text>
           </Button>
         </TouchableOpacity>
       </View>
@@ -44,7 +73,12 @@ function ProfileScreen({ navigation }) {
         overlayStyle={styles.overlayView}
       >
         <View style={styles.inputBox}>
-          <Text style={[styles.text, { color: "grey" }]}>{inputText}</Text>
+          <Input
+            placeholder="0"
+            value={inputText}
+            onChangeText={(text) => setInputText(text)}
+            keyboardType="numeric"
+          />
           <Text style={styles.text}>hrs/week</Text>
         </View>
         <View
@@ -57,24 +91,10 @@ function ProfileScreen({ navigation }) {
           <Button
             title="Cancel"
             onPress={() => {
-              setInputText("");
               setOverlayVisible(false);
             }}
           />
-          <Button
-            title="Save"
-            onPress={() => {
-              //   if (selectedItem) {
-              //     dispatch(
-              //       updateGroup({ group: selectedItem, inputName: inputText })
-              //     );
-              //   } else {
-              //     dispatch(addGroup(inputText));
-              //   }
-              setInputText("");
-              setOverlayVisible(false);
-            }}
-          />
+          <Button title="Save" onPress={handleSaveGoal} />
         </View>
       </Overlay>
     </View>
