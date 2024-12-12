@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ProgressChart, LineChart } from "react-native-chart-kit";
 import { getWorkoutsThunk } from "../features/workoutsSlice";
+import * as Notifications from "expo-notifications";
 
 const screenWidth = Dimensions.get("window").width;
 const chartConfig = {
@@ -27,6 +28,14 @@ const chartConfig = {
   decimalPlaces: 0,
 };
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
+
 function ProfileScreen({ navigation }) {
   const dispatch = useDispatch();
 
@@ -35,11 +44,20 @@ function ProfileScreen({ navigation }) {
 
   const [overlayVisible, setOverlayVisible] = useState(false);
   const [inputText, setInputText] = useState("");
-  const [activeTab, setActiveTab] = useState("workoutTime"); // State for active tab
+  const [activeTab, setActiveTab] = useState("workoutTime");
+  const [completedGoal, setCompletedGoal] = useState(false);
 
   useEffect(() => {
     dispatch(fetchGoal());
     dispatch(getWorkoutsThunk());
+
+    // Request notification permissions
+    (async () => {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission not granted for notifications");
+      }
+    })();
   }, [dispatch]);
 
   const today = new Date();
@@ -49,9 +67,7 @@ function ProfileScreen({ navigation }) {
     const workoutDate = new Date(workout.startTime);
     return workoutDate >= oneWeekAgo && workoutDate <= today;
   });
-  function getDayIndex(date) {
-    return (date.getDay() + 6) % 7;
-  }
+
   // data for calorie chart
   let dailyDataCalories = [0, 0, 0, 0, 0, 0, 0]; // Monday=0, ... Sunday=6
   // data for time chart (total workout duration)
@@ -123,17 +139,9 @@ function ProfileScreen({ navigation }) {
 
   const handleSaveGoal = () => {
     if (goal) {
-      // Goal exists, update it
       dispatch(updateGoal({ ...goal, targetTime: inputText }));
-      {
-        console.log("update goal");
-      }
     } else {
-      // No goal yet, add it
       dispatch(addGoal({ targetTime: inputText }));
-      {
-        console.log("add goal");
-      }
     }
     setOverlayVisible(false);
   };
@@ -141,6 +149,25 @@ function ProfileScreen({ navigation }) {
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
+
+  const checkGoalCompletion = async () => {
+    if (percentage >= 100 && !completedGoal) {
+      setCompletedGoal(true);
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Congratulations!",
+          body: "You have completed your weekly workout goal!",
+        },
+        trigger: null,
+      });
+    } else if (percentage < 100 && completedGoal) {
+      setCompletedGoal(false);
+    }
+  };
+
+  useEffect(() => {
+    checkGoalCompletion();
+  }, [percentage]);
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -155,6 +182,14 @@ function ProfileScreen({ navigation }) {
           />
           <Text style={styles.text}>Hi, {getAuthUser()?.displayName}!</Text>
         </View>
+        <Text>You have spent</Text>
+        <View style={styles.timeSpentContainer}>
+          <Text style={styles.timeSpent}>{Math.floor(totalDuration / 60)}</Text>
+          <Text style={styles.timeSpent}>hr(s)</Text>
+          <Text style={styles.timeSpent}>{totalDuration % 60}</Text>
+          <Text style={styles.timeSpent}>min</Text>
+        </View>
+        <Text>on workout this week</Text>
         <View
           style={{
             position: "relative",
@@ -301,10 +336,9 @@ function ProfileScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Render the appropriate chart based on the selected tab */}
         {activeTab === "workoutTime" ? (
           <LineChart
-            data={workoutDataTime} // Time chart data
+            data={workoutDataTime}
             width={screenWidth * 0.9}
             height={256}
             verticalLabelRotation={30}
@@ -313,7 +347,7 @@ function ProfileScreen({ navigation }) {
           />
         ) : (
           <LineChart
-            data={workoutDataCalories} // Calories chart data
+            data={workoutDataCalories}
             width={screenWidth * 0.9}
             height={256}
             verticalLabelRotation={30}
@@ -326,7 +360,7 @@ function ProfileScreen({ navigation }) {
           title="Log out"
           buttonStyle={styles.logoutButton}
           icon={{
-            name: "save",
+            name: "logout",
             type: "material",
             color: "white",
           }}
@@ -359,6 +393,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 20,
   },
   progressRing: {},
   icon: {
@@ -374,7 +409,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   overlayView: {
-    flex: 0.2,
+    flex: 0.3,
     justifyContent: "center",
     alignItems: "center",
     width: "80%",
@@ -438,7 +473,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#7266E2",
     borderRadius: 10,
     marginTop: 30,
+    marginBottom: 30,
     width: "95%",
+  },
+  timeSpentContainer: {
+    flexDirection: "row",
+    gap: 5,
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  timeSpent: {
+    fontSize: 20,
+    fontWeight: "600",
   },
 });
 
