@@ -4,11 +4,16 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { Icon } from "@rneui/themed";
+
 import AuthSlice from "./features/AuthSlice";
+
 import SignInScreen from "./Screens/SignInScreen";
+
 import HomeScreen from "./Screens/HomeScreen";
 import HomeEditScreen from "./Screens/HomeEditScreen";
 import HomeDetailScreen from "./Screens/HomeDetailScreen";
+import CameraScreen from "./Screens/CameraScreen";
+
 import ProfileScreen from "./Screens/ProfileScreen";
 
 import store from './app/store';
@@ -63,6 +68,7 @@ function HomeStack() {
       <Stack.Screen name='HomeScreen' component={HomeScreen} />
       <Stack.Screen name='HomeEditScreen' component={HomeEditScreen}/>
       <Stack.Screen name='HomeDetailScreen' component={HomeDetailScreen}/>
+      <Stack.Screen name='CameraScreen' component={CameraScreen}/>
     </Stack.Navigator>
   );
 }

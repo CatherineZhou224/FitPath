@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { getAuthUser } from "../AuthManager";
+import { signOut, getAuthUser } from "../AuthManager";
 import { fetchGoal, addGoal, updateGoal } from "../features/userSlice";
 import { Button, Overlay, Icon, Input } from "@rneui/themed";
 import { useEffect, useState } from "react";
@@ -97,6 +97,22 @@ function ProfileScreen({ navigation }) {
           <Button title="Save" onPress={handleSaveGoal} />
         </View>
       </Overlay>
+
+      <View style={{ marginBottom: 20 }}>
+        <Text>You're signed in, {getAuthUser().displayName}!</Text>
+
+        <Button
+          onPress={async () => {
+            try {
+              await signOut();
+            } catch (error) {
+              Alert.alert("Sign In Error", error.message, [{ text: "OK" }]);
+            }
+          }}
+        >
+          Now sign out!
+        </Button>
+      </View>
     </View>
   );
 }

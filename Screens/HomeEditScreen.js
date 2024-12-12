@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
-import { Input, Icon, Button, BottomSheet } from '@rneui/themed';
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, Image, Alert } from 'react-native';
+import { Input, Icon, Button } from '@rneui/themed';
+import * as Location from 'expo-location'; // Import expo-location
 import { useDispatch } from 'react-redux';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { addWorkoutThunk, updateWorkoutThunk } from "../features/workoutsSlice";
@@ -48,8 +49,32 @@ function HomeEditScreen(props) {
     }
   };
 
+  const handleFetchLocation = async () => {
+    try {
+      // Request location permissions
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Location permissions are required to fetch your location.');
+        return;
+      }
+
+      // Get current location
+      const { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+      const { latitude, longitude } = coords;
+
+      // Convert coordinates to address
+      const [address] = await Location.reverseGeocodeAsync({ latitude, longitude });
+
+      // Format address
+      const formattedAddress = `${address.name || ''}, ${address.city || ''}, ${address.region || ''}`;
+      setLocation(formattedAddress || 'Unknown Location');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to fetch location. Please try again.');
+      console.error(error);
+    }
+  };
+
   return (
-    // Adjusts its height to avoid the keyboard when it appears
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -57,9 +82,9 @@ function HomeEditScreen(props) {
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.headerContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" type="material" color="#7266E2" size={24} />
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" type="material" color="#7266E2" size={24} />
+          </TouchableOpacity>
           <Text style={styles.headerTitle}>{item.key === -1 ? 'Add Workout' : 'Edit Workout'}</Text>
         </View>
 
@@ -75,10 +100,17 @@ function HomeEditScreen(props) {
               type="material-community"
               color="black"
               onPress={() => {
-                // Placeholder for image capture logic
+                navigation.navigate('CameraScreen', {
+                  onSave: (capturedImage) => setImage(capturedImage),
+                });
               }}
             />
           </View>
+          {image ? (
+            <View style={styles.imagePreviewContainer}>
+              <Image source={{ uri: image }} style={styles.imagePreview} />
+            </View>
+          ) : null}
 
           {/* Workout Type */}
           <View style={styles.inputContainer}>
@@ -92,11 +124,10 @@ function HomeEditScreen(props) {
             />
           </View>
 
-          {/* Start Time - Always Visible Date and Time Pickers */}
+          {/* Start Time */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Start date and time</Text>
             <View style={styles.pickerContainer}>
-              {/* Date Picker */}
               <DateTimePicker
                 value={startTime}
                 mode="date"
@@ -104,7 +135,6 @@ function HomeEditScreen(props) {
                 onChange={handleDateChange}
                 style={styles.picker}
               />
-              {/* Time Picker */}
               <DateTimePicker
                 value={startTime}
                 mode="time"
@@ -118,53 +148,56 @@ function HomeEditScreen(props) {
           {/* Duration */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Duration</Text>
-            <Input
-              containerStyle={styles.inputBox}
-              inputContainerStyle={{ borderBottomWidth: 0 }}
-              placeholder="min"
-              value={duration}
-              onChangeText={setDuration}
-              keyboardType="numeric"
-            />
+            <View style={styles.withUnitContainer}>
+              <Input
+                containerStyle={styles.inputBoxWithUnit}
+                inputContainerStyle={{ borderBottomWidth: 0 }}
+                placeholder="min"
+                value={duration}
+                onChangeText={setDuration}
+                keyboardType="numeric"
+              />
+              <Text style={styles.unitText}>min</Text>
+            </View>
           </View>
 
-          {/* Calories Burned */}
+          {/* Calories */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Calories burned</Text>
-            <Input
-              containerStyle={styles.inputBox}
-              inputContainerStyle={{ borderBottomWidth: 0 }}
-              placeholder="cal"
-              value={calories}
-              onChangeText={setCalories}
-              keyboardType="numeric"
-            />
+            <View style={styles.withUnitContainer}>
+              <Input
+                containerStyle={styles.inputBoxWithUnit}
+                inputContainerStyle={{ borderBottomWidth: 0 }}
+                placeholder="cal"
+                value={calories}
+                onChangeText={setCalories}
+                keyboardType="numeric"
+              />
+              <Text style={styles.unitText}>cal</Text>
+            </View>
           </View>
 
           {/* Location */}
           <View style={styles.locationContainer}>
-            <Text style={styles.locationLabel}>Location</Text>
+            <Text style={styles.locationLabel}>{location || 'Tap the icon to fetch your location'}</Text>
             <Icon
               name="location-on"
               type="material"
               color="black"
-              onPress={() => {
-                // Placeholder for location picker logic
-              }}
+              onPress={handleFetchLocation}
             />
           </View>
         </ScrollView>
-        {/* Add Button */}
         <Button
-            title="Add"
-            buttonStyle={styles.addButton}
-            icon={{
-              name: "add-circle",
-              type: "material",
-              color: "white",
-            }}
-            onPress={handleSave}
-          />
+          title="Save"
+          buttonStyle={styles.saveButton}
+          icon={{
+            name: "save",
+            type: "material",
+            color: "white",
+          }}
+          onPress={handleSave}
+        />
       </View>
     </KeyboardAvoidingView>
   );
@@ -192,7 +225,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -210,15 +242,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   captureText: {
-    fontSize: 16,
+    fontSize: 10,
     color: 'black',
   },
-  inputContainer: {
-    backgroundColor: '#EDEDED',
+  imagePreviewContainer: {
+    borderWidth: 2,
+    borderColor: '#7266E2',
     borderRadius: 10,
+    overflow: 'hidden',
+    width: '95%',
+    aspectRatio: 16 / 6,
+    marginBottom: 20,
+    marginHorizontal: '2.5%',
+  },
+  imagePreview: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  inputContainer: {
+    backgroundColor: 'transparent',
     paddingVertical: 10,
     paddingHorizontal: 10,
-    marginBottom: 15,
   },
   inputLabel: {
     fontSize: 16,
@@ -226,25 +271,50 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: 'black',
   },
-  inputBox: {
-    backgroundColor: 'white',
-    borderRadius: 5,
-    paddingHorizontal: 5,
-  },
+
   pickerContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    justifyContent: 'flex-start',
     paddingVertical: 10,
+    borderRadius: 10,
   },
   picker: {
     flex: 1,
+  },
+  withUnitContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  unitText: {
+    fontSize: 16,
+    color: '#7266E2',
+    marginLeft: 10,
+    fontWeight: 'bold',
+  },
+  inputBoxWithUnit: {
+    backgroundColor: '#F0E4FE',
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#DFDFDF',
+    paddingHorizontal: 5,
+    width: '85%',
+    height: 60,
+  },
+  inputBox: {
+    backgroundColor: '#F0E4FE',
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#DFDFDF',
+    paddingHorizontal: 5,
+    width: '100%',
+    height: 60,
   },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#EDEDED',
+    backgroundColor: 'transparent',
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 10,
@@ -252,16 +322,12 @@ const styles = StyleSheet.create({
   },
   locationLabel: {
     fontSize: 16,
-    fontWeight: 'bold',
     color: 'black',
   },
-  addButton: {
-    position: 'fixed',
+  saveButton: {
     backgroundColor: '#7266E2',
     borderRadius: 10,
-    paddingVertical: '3%',
-    marginHorizontal: '3%',
-    marginBottom: '3%',
+    margin: 20,
   },
 });
 

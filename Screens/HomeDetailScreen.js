@@ -156,7 +156,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   detailCard: {
-    backgroundColor: '#EDEDED',
+    backgroundColor: '#F0E4FE',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     borderRadius: 10,
     paddingVertical: 15,
     paddingHorizontal: 20,
