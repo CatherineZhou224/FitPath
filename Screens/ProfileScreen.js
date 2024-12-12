@@ -132,9 +132,10 @@ function ProfileScreen({ navigation }) {
   let percentage = 0;
   if (targetTime > 0) {
     percentage = Math.floor((totalDuration / targetTime) * 100);
+    console.log(totalDuration, targetTime, percentage);
   }
   const personalGoal = {
-    data: [percentage],
+    data: [percentage >= 100 ? 1 : percentage / 100],
   };
 
   const handleSaveGoal = () => {
@@ -220,18 +221,24 @@ function ProfileScreen({ navigation }) {
             }}
           >
             {goal && (
-              <>
+              <View
+                style={{
+                  flex: "col",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
                 <Text>Goal Progress</Text>
                 <Text
                   style={{
-                    fontSize: 40,
+                    fontSize: 30,
                     marginTop: 10,
                     marginBottom: 10,
                   }}
                 >
-                  {personalGoal.data[0]} %
+                  {personalGoal.data[0] * 100} %
                 </Text>
-              </>
+              </View>
             )}
             <TouchableOpacity>
               <Button
