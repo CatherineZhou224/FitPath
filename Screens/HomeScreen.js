@@ -1,34 +1,51 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ImageBackground } from 'react-native';
-import { useSelector } from 'react-redux';
-import { Icon, Button } from '@rneui/themed';
-import moment from 'moment';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  ImageBackground,
+} from "react-native";
+import { useSelector, useDispatch } from "react-redux";
+import { Icon } from "@rneui/themed";
+import moment from "moment";
+import { getWorkoutsThunk } from "../features/workoutsSlice";
 
 function HomeScreen({ navigation, route }) {
+  const dispatch = useDispatch();
   const workouts = useSelector((state) => state.workouts.list);
-  const [filteredWorkouts, setFilteredWorkouts] = useState(workouts);
-  const [headerText, setHeaderText] = useState({ main: 'Today', date: moment().format('dddd, MMM DD, YYYY') });
+  const [filteredWorkouts, setFilteredWorkouts] = useState([]);
+  const [headerText, setHeaderText] = useState({
+    main: "Today",
+    date: moment().format("dddd, MMM DD, YYYY"),
+  });
 
   // Get selectedDate from route params
   const selectedDate = route.params?.selectedDate || null;
 
-  // Filter workouts and update the header text based on selectedDate
+  // Fetch workouts from Firebase when the component mounts
+  useEffect(() => {
+    dispatch(getWorkoutsThunk());
+  }, [dispatch]);
+
+  // Update the filteredWorkouts and headerText based on the selected date
   useEffect(() => {
     if (selectedDate) {
       const filtered = workouts.filter((workout) => {
-        const workoutDate = moment(workout.startTime).format('YYYY-MM-DD');
+        const workoutDate = moment(workout.startTime).format("YYYY-MM-DD");
         return workoutDate === selectedDate;
       });
       setFilteredWorkouts(filtered);
       setHeaderText({
-        main: 'Date', // Display "Date Filter" when a specific date is selected
-        date: moment(selectedDate).format('dddd, MMM DD, YYYY'), // Show the selected date
+        main: "Date",
+        date: moment(selectedDate).format("dddd, MMM DD, YYYY"),
       });
     } else {
-      setFilteredWorkouts(workouts); // Show all logs
+      setFilteredWorkouts(workouts);
       setHeaderText({
-        main: 'Today', // Reset to "Today" when no date filter is applied
-        date: moment().format('dddd, MMM DD, YYYY'), // Show today's date
+        main: "Today",
+        date: moment().format("dddd, MMM DD, YYYY"),
       });
     }
   }, [selectedDate, workouts]);
@@ -41,16 +58,14 @@ function HomeScreen({ navigation, route }) {
           <Text style={styles.headerDateText1}>{headerText.main}</Text>
           <Text style={styles.headerDateText2}>{headerText.date}</Text>
         </View>
-        <TouchableOpacity
-            onPress={() => navigation.navigate('CalendarScreen')}
-        >
-        <Icon
-          name="calendar"
-          type="ionicon"
-          color="#7266E2"
-          size={24}
-          containerStyle={styles.calendarIcon}
-        />
+        <TouchableOpacity onPress={() => navigation.navigate("CalendarScreen")}>
+          <Icon
+            name="calendar"
+            type="ionicon"
+            color="#7266E2"
+            size={24}
+            containerStyle={styles.calendarIcon}
+          />
         </TouchableOpacity>
       </View>
 
@@ -61,13 +76,17 @@ function HomeScreen({ navigation, route }) {
         renderItem={({ item, index }) => (
           <TouchableOpacity
             style={styles.cardContainer}
-            onPress={() => navigation.navigate('HomeDetailScreen', { item })}
+            onPress={() => navigation.navigate("HomeDetailScreen", { item })}
           >
             <ImageBackground
               source={item.image ? { uri: item.image } : null}
               style={[
                 styles.cardBackground,
-                item.image ? styles.imageCard : index % 2 === 0 ? styles.evenCard : styles.oddCard,
+                item.image
+                  ? styles.imageCard
+                  : index % 2 === 0
+                  ? styles.evenCard
+                  : styles.oddCard,
               ]}
               imageStyle={styles.cardImage}
             >
@@ -76,11 +95,15 @@ function HomeScreen({ navigation, route }) {
               <View style={styles.cardContent}>
                 <View style={styles.cardHeader}>
                   <Text style={styles.cardTitle}>{item.workoutType}</Text>
-                  <Text style={styles.cardDate}>{moment(item.startTime).format('MMM DD, HH:mm')}</Text>
+                  <Text style={styles.cardDate}>
+                    {moment(item.startTime).format("MMM DD, HH:mm")}
+                  </Text>
                 </View>
                 <Text style={styles.timeSpentLabel}>Time spent</Text>
                 <View style={styles.timeSpentContainer}>
-                  <Text style={styles.timeSpent}>{Math.floor(item.duration / 60)}</Text>
+                  <Text style={styles.timeSpent}>
+                    {Math.floor(item.duration / 60)}
+                  </Text>
                   <Text style={styles.timeUnit}>hr</Text>
                   <Text style={styles.timeSpent}>{item.duration % 60}</Text>
                   <Text style={styles.timeUnit}>min</Text>
@@ -92,7 +115,9 @@ function HomeScreen({ navigation, route }) {
                     color="#E6E6E6"
                     size={20}
                   />
-                  <Text style={styles.locationText}>{item.location || 'Location TBD'}</Text>
+                  <Text style={styles.locationText}>
+                    {item.location || "Location TBD"}
+                  </Text>
                 </View>
               </View>
             </ImageBackground>
@@ -105,8 +130,15 @@ function HomeScreen({ navigation, route }) {
       <TouchableOpacity
         style={styles.addButton}
         onPress={() =>
-          navigation.navigate('HomeEditScreen', {
-            item: { key: -1, workoutType: '', startTime: '', duration: '', calories: '', location: '' },
+          navigation.navigate("HomeEditScreen", {
+            item: {
+              key: -1,
+              workoutType: "",
+              startTime: "",
+              duration: "",
+              calories: "",
+              location: "",
+            },
           })
         }
       >
@@ -119,128 +151,128 @@ function HomeScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingTop: 60,
-    paddingBottom: '5%',
-    backgroundColor: 'white',
+    paddingBottom: "5%",
+    backgroundColor: "white",
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
   },
   headerTextContainer: {
-    flexDirection: 'column',
+    flexDirection: "column",
   },
   headerDateText1: {
     fontSize: 16,
-    color: '#333',
-    fontWeight: 'bold',
+    color: "#333",
+    fontWeight: "bold",
   },
   headerDateText2: {
     fontSize: 16,
-    color: '#333',
+    color: "#333",
   },
   calendarIcon: {
     padding: 5,
   },
   listContainer: {
-    marginTop: '5%',
+    marginTop: "5%",
     paddingHorizontal: 15,
     paddingBottom: 100, // Extra space for floating add button
   },
   cardContainer: {
     borderRadius: 10,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginBottom: 15,
   },
   cardBackground: {
     flex: 1,
     padding: 20,
-    position: 'relative',
+    position: "relative",
   },
   cardImage: {
     opacity: 0.6, // Adjust the opacity of the image
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'black',
+    backgroundColor: "black",
     opacity: 0.4, // Dark overlay with transparency
   },
   cardContent: {
     flex: 1,
   },
   oddCard: {
-    backgroundColor: '#7266E2',
+    backgroundColor: "#7266E2",
   },
   evenCard: {
-    backgroundColor: '#835FBE',
+    backgroundColor: "#835FBE",
   },
   imageCard: {
-    backgroundColor: 'black',
+    backgroundColor: "black",
   },
   cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 10,
   },
   cardTitle: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 16,
-    color: 'white',
+    color: "white",
   },
   cardDate: {
     fontSize: 14,
-    color: '#E6E6E6',
+    color: "#E6E6E6",
   },
   timeSpentLabel: {
     fontSize: 14,
-    color: '#E6E6E6',
+    color: "#E6E6E6",
     marginBottom: 5,
   },
   timeSpentContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
+    flexDirection: "row",
+    alignItems: "baseline",
     marginBottom: 10,
   },
   timeSpent: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
   },
   timeUnit: {
     fontSize: 14,
     marginLeft: 5,
     marginRight: 15,
-    color: 'white',
+    color: "white",
   },
   locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   locationText: {
     fontSize: 14,
-    color: '#E6E6E6',
-    marginLeft: '2%',
+    color: "#E6E6E6",
+    marginLeft: "2%",
   },
   addButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 20,
-    alignSelf: 'center',
-    backgroundColor: '#7266E2',
+    alignSelf: "center",
+    backgroundColor: "#7266E2",
     width: 60,
     height: 60,
     borderRadius: 35,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     elevation: 5,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
