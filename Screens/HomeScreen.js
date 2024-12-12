@@ -1,45 +1,62 @@
-import { signOut, getAuthUser } from "../AuthManager";
-import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ImageBackground } from "react-native";
-import { Icon, Button } from "@rneui/themed";
-import { useSelector, useDispatch } from 'react-redux';
-import { getWorkoutsThunk } from "../features/workoutsSlice";
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ImageBackground } from 'react-native';
+import { useSelector } from 'react-redux';
+import { Icon, Button } from '@rneui/themed';
 import moment from 'moment';
 
-function HomeScreen(props) {
-  const dispatch = useDispatch();
-  const { navigation } = props;
-
-  // Workouts from Redux store
+function HomeScreen({ navigation, route }) {
   const workouts = useSelector((state) => state.workouts.list);
+  const [filteredWorkouts, setFilteredWorkouts] = useState(workouts);
+  const [headerText, setHeaderText] = useState({ main: 'Today', date: moment().format('dddd, MMM DD, YYYY') });
 
-  // Get current date
-  const currentDate = moment().format("dddd, MMM DD, YYYY");
+  // Get selectedDate from route params
+  const selectedDate = route.params?.selectedDate || null;
 
+  // Filter workouts and update the header text based on selectedDate
   useEffect(() => {
-    dispatch(getWorkoutsThunk());
-  }, [dispatch]);
+    if (selectedDate) {
+      const filtered = workouts.filter((workout) => {
+        const workoutDate = moment(workout.startTime).format('YYYY-MM-DD');
+        return workoutDate === selectedDate;
+      });
+      setFilteredWorkouts(filtered);
+      setHeaderText({
+        main: 'Date', // Display "Date Filter" when a specific date is selected
+        date: moment(selectedDate).format('dddd, MMM DD, YYYY'), // Show the selected date
+      });
+    } else {
+      setFilteredWorkouts(workouts); // Show all logs
+      setHeaderText({
+        main: 'Today', // Reset to "Today" when no date filter is applied
+        date: moment().format('dddd, MMM DD, YYYY'), // Show today's date
+      });
+    }
+  }, [selectedDate, workouts]);
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.headerContainer}>
         <View style={styles.headerTextContainer}>
-          <Text style={styles.headerDateText1}>Today</Text>
-          <Text style={styles.headerDateText2}>{currentDate}</Text>
+          <Text style={styles.headerDateText1}>{headerText.main}</Text>
+          <Text style={styles.headerDateText2}>{headerText.date}</Text>
         </View>
+        <TouchableOpacity
+            onPress={() => navigation.navigate('CalendarScreen')}
+        >
         <Icon
           name="calendar"
           type="ionicon"
-          color="black"
+          color="#7266E2"
           size={24}
           containerStyle={styles.calendarIcon}
         />
+        </TouchableOpacity>
       </View>
 
       {/* Workout List */}
       <FlatList
-        data={workouts}
+        data={filteredWorkouts}
         keyExtractor={(item) => item.key}
         renderItem={({ item, index }) => (
           <TouchableOpacity
@@ -75,7 +92,7 @@ function HomeScreen(props) {
                     color="#E6E6E6"
                     size={20}
                   />
-                  <Text style={styles.locationText}>{item.location || "Location TBD"}</Text>
+                  <Text style={styles.locationText}>{item.location || 'Location TBD'}</Text>
                 </View>
               </View>
             </ImageBackground>
@@ -87,16 +104,13 @@ function HomeScreen(props) {
       {/* Add Button */}
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate('HomeEditScreen', {
-          item: { key: -1, workoutType: '', startTime: '', duration: '', calories: '', location: '' }
-        })}
+        onPress={() =>
+          navigation.navigate('HomeEditScreen', {
+            item: { key: -1, workoutType: '', startTime: '', duration: '', calories: '', location: '' },
+          })
+        }
       >
-        <Icon
-          name="add"
-          type="ionicon"
-          color="white"
-          size={40}
-        />
+        <Icon name="add" type="ionicon" color="white" size={40} />
       </TouchableOpacity>
     </View>
   );
@@ -115,6 +129,14 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: '5%',
     backgroundColor: 'white',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  headerTextContainer: {
+    flexDirection: 'column',
   },
   headerDateText1: {
     fontSize: 16,
@@ -129,6 +151,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   listContainer: {
+    marginTop: '5%',
     paddingHorizontal: 15,
     paddingBottom: 100, // Extra space for floating add button
   },
@@ -217,7 +240,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 2,

@@ -13,6 +13,7 @@ import HomeScreen from "./Screens/HomeScreen";
 import HomeEditScreen from "./Screens/HomeEditScreen";
 import HomeDetailScreen from "./Screens/HomeDetailScreen";
 import CameraScreen from "./Screens/CameraScreen";
+import CalendarScreen from "./Screens/CalendarScreen";
 
 import ProfileScreen from "./Screens/ProfileScreen";
 
@@ -69,6 +70,7 @@ function HomeStack() {
       <Stack.Screen name='HomeEditScreen' component={HomeEditScreen}/>
       <Stack.Screen name='HomeDetailScreen' component={HomeDetailScreen}/>
       <Stack.Screen name='CameraScreen' component={CameraScreen}/>
+      <Stack.Screen name='CalendarScreen' component={CalendarScreen}/>
     </Stack.Navigator>
   );
 }

@@ -105,7 +105,7 @@ function HomeEditScreen(props) {
                 <Icon
                   name="close-circle"
                   type="material-community"
-                  color="red"
+                  color="#7266E2"
                   size={24}
                   onPress={() => setImage('')} // Clear image
                   containerStyle={styles.cancelIcon}
@@ -198,7 +198,7 @@ function HomeEditScreen(props) {
                 <Icon
                   name="close-circle"
                   type="material-community"
-                  color="red"
+                  color="#7266E2"
                   size={24}
                   onPress={() => setLocation('')} // Clear location
                   containerStyle={styles.cancelIcon}
@@ -234,6 +234,11 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingBottom: 20,
     backgroundColor: 'white',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   backButton: {
     width: 40,
@@ -251,6 +256,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContainer: {
     paddingHorizontal: 15,
+    marginTop: '5%',
   },
   captureContainer: {
     flexDirection: 'row',
@@ -272,7 +278,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   imagePreviewContainer: {
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#7266E2',
     borderRadius: 10,
     overflow: 'hidden',
@@ -297,6 +303,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: 'black',
   },
+  
   pickerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -320,19 +327,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   inputBoxWithUnit: {
-    backgroundColor: '#F0E4FE',
+    backgroundColor: 'white',
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: '#DFDFDF',
+    borderColor: '#7266E2',
     paddingHorizontal: 5,
     width: '85%',
     height: 60,
   },
   inputBox: {
-    backgroundColor: '#F0E4FE',
+    backgroundColor: 'white',
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: '#DFDFDF',
+    borderColor: '#7266E2',
     paddingHorizontal: 5,
     width: '100%',
     height: 60,

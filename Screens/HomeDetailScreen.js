@@ -51,12 +51,12 @@ function HomeDetailsScreen(props) {
 
       {/* Details Section */}
       <ScrollView contentContainerStyle={styles.detailsContainer}>
-         {/* Workout Image */}
-      <Image
-        source={workout.image ? { uri: workout.image } : imageNotAvailable}
-        style={styles.workoutImage}
-      />
-        <Text style={styles.workoutTitle}>Workout {workout.workoutType}</Text>
+        {/* Workout Image */}
+        <Image
+          source={workout.image ? { uri: workout.image } : imageNotAvailable}
+          style={styles.workoutImage}
+        />
+        <Text style={styles.workoutTitle}>{workout.workoutType}</Text>
 
         {/* Workout Details */}
         <View style={styles.detailCard}>
@@ -65,16 +65,19 @@ function HomeDetailsScreen(props) {
             {workout.startTime ? moment(workout.startTime).format('MMM DD, HH:mm') : ""}
           </Text>
         </View>
+        <View style={styles.line} />
 
         <View style={styles.detailCard}>
           <Text style={styles.detailLabel}>Duration</Text>
           <Text style={styles.detailValue}>{formatDuration(workout.duration)}</Text>
         </View>
+        <View style={styles.line} />
 
         <View style={styles.detailCard}>
           <Text style={styles.detailLabel}>Calories burned</Text>
           <Text style={styles.detailValue}>{workout.calories ? `${workout.calories} cal` : ""}</Text>
         </View>
+        <View style={styles.line} />
 
         {/* Location */}
         <View style={styles.locationContainer}>
@@ -82,8 +85,9 @@ function HomeDetailsScreen(props) {
           <Text style={styles.locationText}>{workout.location || "Location TBD"}</Text>
         </View>
       </ScrollView>
-        {/* Edit Button */}
-        <View style={styles.CRUDbuttonContainer}>
+
+      {/* Edit & Delete Buttons */}
+      <View style={styles.CRUDbuttonContainer}>
         <Button
           title="Edit"
           buttonStyle={styles.editButton}
@@ -94,8 +98,6 @@ function HomeDetailsScreen(props) {
           }}
           onPress={() => navigation.navigate('HomeEditScreen', { item: workout })}
         />
-
-        {/* Delete Button */}
         <Button
           title="Delete"
           buttonStyle={styles.deleteButton}
@@ -109,7 +111,7 @@ function HomeDetailsScreen(props) {
             navigation.goBack();
           }}
         />
-        </View>
+      </View>
     </View>
   );
 }
@@ -126,6 +128,11 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingBottom: 20,
     backgroundColor: 'white',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   backButton: {
     width: 40,
@@ -145,6 +152,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 150,
     resizeMode: 'cover',
+    marginTop: '5%',
     marginBottom: 20,
     borderRadius: 10,
   },
@@ -157,13 +165,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   detailCard: {
-    backgroundColor: '#F0E4FE',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    borderRadius: 10,
     paddingVertical: 15,
-    paddingHorizontal: 20,
-    marginBottom: 15,
+    marginBottom: 0,
   },
   detailLabel: {
     fontWeight: 'bold',
@@ -173,12 +178,17 @@ const styles = StyleSheet.create({
   detailValue: {
     fontSize: 16,
     color: '#333',
-    marginTop: 5,
+  },
+  line: {
+    height: 1,
+    backgroundColor: '#F0E4FE', // Light gray line
+    marginVertical: 10,
   },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 15,
+    marginVertical: '5%',
+    marginBottom: '15%',
   },
   locationText: {
     fontSize: 16,
@@ -186,11 +196,9 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   CRUDbuttonContainer: {
-    backgroundColor: 't',
+    backgroundColor: 'transparent',
   },
-
   editButton: {
-    position: 'fixed',
     backgroundColor: '#7266E2',
     borderRadius: 10,
     paddingVertical: '3%',
@@ -198,7 +206,6 @@ const styles = StyleSheet.create({
     marginHorizontal: '3%',
   },
   deleteButton: {
-    position: 'fixed',
     backgroundColor: 'black',
     borderRadius: 10,
     paddingVertical: '3%',
