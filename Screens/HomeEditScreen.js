@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, Image, Alert } from 'react-native';
 import { Input, Icon, Button } from '@rneui/themed';
-import * as Location from 'expo-location'; // Import expo-location
+import * as Location from 'expo-location';
 import { useDispatch } from 'react-redux';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { addWorkoutThunk, updateWorkoutThunk } from "../features/workoutsSlice";
@@ -23,7 +23,7 @@ function HomeEditScreen(props) {
     const workoutData = {
       image,
       workoutType,
-      startTime: startTime.toISOString(), // Saving in ISO format
+      startTime: startTime.toISOString(),
       duration,
       calories,
       location,
@@ -51,21 +51,16 @@ function HomeEditScreen(props) {
 
   const handleFetchLocation = async () => {
     try {
-      // Request location permissions
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert('Permission Denied', 'Location permissions are required to fetch your location.');
         return;
       }
 
-      // Get current location
       const { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
       const { latitude, longitude } = coords;
 
-      // Convert coordinates to address
       const [address] = await Location.reverseGeocodeAsync({ latitude, longitude });
-
-      // Format address
       const formattedAddress = `${address.name || ''}, ${address.city || ''}, ${address.region || ''}`;
       setLocation(formattedAddress || 'Unknown Location');
     } catch (error) {
@@ -95,16 +90,28 @@ function HomeEditScreen(props) {
           {/* Image Capture Section */}
           <View style={styles.captureContainer}>
             <Text style={styles.captureText}>Capture your workout moment</Text>
-            <Icon
-              name="camera-plus"
-              type="material-community"
-              color="black"
-              onPress={() => {
-                navigation.navigate('CameraScreen', {
-                  onSave: (capturedImage) => setImage(capturedImage),
-                });
-              }}
-            />
+            <View style={styles.captureIcons}>
+              <Icon
+                name="camera-plus"
+                type="material-community"
+                color="black"
+                onPress={() => {
+                  navigation.navigate('CameraScreen', {
+                    onSave: (capturedImage) => setImage(capturedImage),
+                  });
+                }}
+              />
+              {image ? (
+                <Icon
+                  name="close-circle"
+                  type="material-community"
+                  color="red"
+                  size={24}
+                  onPress={() => setImage('')} // Clear image
+                  containerStyle={styles.cancelIcon}
+                />
+              ) : null}
+            </View>
           </View>
           {image ? (
             <View style={styles.imagePreviewContainer}>
@@ -179,13 +186,25 @@ function HomeEditScreen(props) {
 
           {/* Location */}
           <View style={styles.locationContainer}>
-            <Text style={styles.locationLabel}>{location || 'Tap the icon to fetch your location'}</Text>
-            <Icon
-              name="location-on"
-              type="material"
-              color="black"
-              onPress={handleFetchLocation}
-            />
+            <Text style={styles.locationLabel}>{location || 'Tap the icon to get your location'}</Text>
+            <View style={styles.captureIcons}>
+              <Icon
+                name="location-on"
+                type="material"
+                color="black"
+                onPress={handleFetchLocation}
+              />
+              {location ? (
+                <Icon
+                  name="close-circle"
+                  type="material-community"
+                  color="red"
+                  size={24}
+                  onPress={() => setLocation('')} // Clear location
+                  containerStyle={styles.cancelIcon}
+                />
+              ) : null}
+            </View>
           </View>
         </ScrollView>
         <Button
@@ -235,15 +254,22 @@ const styles = StyleSheet.create({
   },
   captureContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: 20,
     marginBottom: 20,
     paddingHorizontal: 10,
   },
   captureText: {
-    fontSize: 10,
+    fontSize: 16,
     color: 'black',
+  },
+  captureIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cancelIcon: {
+    marginLeft: 10,
   },
   imagePreviewContainer: {
     borderWidth: 2,
@@ -271,13 +297,14 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: 'black',
   },
-
   pickerContainer: {
     flexDirection: 'row',
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 10,
     borderRadius: 10,
   },
+
   picker: {
     flex: 1,
   },

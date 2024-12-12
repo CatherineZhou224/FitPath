@@ -146,6 +146,7 @@ const styles = StyleSheet.create({
     height: 150,
     resizeMode: 'cover',
     marginBottom: 20,
+    borderRadius: 10,
   },
   detailsContainer: {
     paddingHorizontal: 20,
