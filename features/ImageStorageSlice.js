@@ -1,8 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { initializeApp, getApps } from "firebase/app";
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { updateDoc, doc, getFirestore } from 'firebase/firestore';
 import { firebaseConfig } from "../Secrets";
+
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+} from 'firebase/storage';
 
 // Firebase initialization
 let app;
@@ -15,9 +21,9 @@ if (apps.length === 0) {
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Upload image and update user gallery
+// Upload image
 export const setPicture = createAsyncThunk(
-  'imageStorage/setPicture',
+  'app/setPicture',
   async (pictureObject, { getState }) => {
     const fileName = pictureObject.uri.split('/').pop();
     const currentPhotoRef = ref(storage, `images/${fileName}`);
@@ -25,25 +31,22 @@ export const setPicture = createAsyncThunk(
       const response = await fetch(pictureObject.uri);
       const imageBlob = await response.blob();
       await uploadBytes(currentPhotoRef, imageBlob);
-
       const downloadURL = await getDownloadURL(currentPhotoRef);
-      const currentUser = getState().auth.currentUser;
 
-      const newPicture = {
-        ...pictureObject,
-        uri: downloadURL
-      };
-      const newGallery = currentUser?.gallery
-        ? currentUser.gallery.concat(newPicture)
-        : [newPicture];
+      // Update the specific workout document with the image URI
+      const currentWorkoutKey = getState().workoutsSlice.currentEditingWorkoutKey;
+      if (!currentWorkoutKey) throw new Error("No workout specified.");
 
-      await updateDoc(doc(db, 'users', currentUser.key), { gallery: newGallery });
+      const workoutRef = doc(db, 'workouts', currentWorkoutKey);
+      await updateDoc(workoutRef, { image: downloadURL });
+
       return downloadURL;
     } catch (e) {
-      console.error("Error saving picture:", e);
+      console.error('Error saving picture:', e);
     }
   }
 );
+
 
 // Image Storage Slice
 export const imageStorageSlice = createSlice({

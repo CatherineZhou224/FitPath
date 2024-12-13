@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, TouchableOpacity, Image, Alert } from 'react-native';
 import { Input, Icon, Button } from '@rneui/themed';
 import * as Location from 'expo-location';
@@ -68,6 +68,12 @@ function HomeEditScreen(props) {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    if (route.params?.updatedImage) {
+      setImage(route.params.updatedImage);
+    }
+  }, [route.params?.updatedImage]);
 
   return (
     <KeyboardAvoidingView

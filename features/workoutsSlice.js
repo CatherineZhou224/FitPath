@@ -12,7 +12,7 @@ const db = getFirestore(app);
 export const addWorkoutThunk = createAsyncThunk(
   'workoutfirebase/addWorkout',
   async (workoutData) => {
-      const workoutsCollRef = collection(db, 'workoutsTest');
+      const workoutsCollRef = collection(db, 'workouts');
       const workoutSnap = await addDoc(workoutsCollRef, {
         image: workoutData.image || '',
         workoutType: workoutData.workoutType || '',
@@ -33,7 +33,7 @@ export const addWorkoutThunk = createAsyncThunk(
 export const updateWorkoutThunk = createAsyncThunk(
   'workoutfirebase/updateWorkout',
   async (workout) => {
-    const docToUpdate = doc(db, 'workoutsTest', workout.item.key);
+    const docToUpdate = doc(db, 'workouts', workout.item.key);
     await updateDoc(docToUpdate, {
       image: workout.workoutData.image || '',
       workoutType: workout.workoutData.workoutType || '',
@@ -52,7 +52,7 @@ export const updateWorkoutThunk = createAsyncThunk(
 export const deleteWorkoutThunk = createAsyncThunk(
   'workoutfirebase/deleteWorkout',
   async (workoutId) => {
-    const docToDelete = doc(db, 'workoutsTest', workoutId);
+    const docToDelete = doc(db, 'workouts', workoutId);
     await deleteDoc(docToDelete);
     return workoutId;
   }
@@ -63,7 +63,7 @@ export const getWorkoutsThunk = createAsyncThunk(
   'workoutfirebase/getWorkouts',
   async () => {
     const workoutsList = [];
-    const workoutsCollRef = collection(db, 'workoutsTest');
+    const workoutsCollRef = collection(db, 'workouts');
     const querySnapshot = await getDocs(workoutsCollRef);
     querySnapshot.docs.forEach((docSnapshot) => {
       const workout = docSnapshot.data();

@@ -3,12 +3,13 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSelector } from 'react-redux';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Icon } from '@rneui/themed';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 function CameraScreen({ navigation, route }) {
-  const { onSave } = route.params;
+  const { onSave, workoutKey } = route.params; // Accept `workoutKey` for linking to the workout
   const [permission, requestPermission] = useCameraPermissions();
-  const [image, setImage] = useState(null);
   let cameraRef;
+  const storage = getStorage();
 
   if (!permission) {
     return <View />;
@@ -28,9 +29,21 @@ function CameraScreen({ navigation, route }) {
   const handleSnap = async () => {
     if (cameraRef) {
       const photo = await cameraRef.takePictureAsync();
-      setImage(photo.uri);
-      onSave(photo.uri);
-      navigation.goBack();
+
+      try {
+        const fileName = photo.uri.split('/').pop();
+        const photoRef = ref(storage, `workouts/${fileName}`);
+        const response = await fetch(photo.uri);
+        const imageBlob = await response.blob();
+        await uploadBytes(photoRef, imageBlob);
+        const downloadURL = await getDownloadURL(photoRef);
+
+        // Pass the image URL back to HomeEditScreen
+        if (onSave) onSave(downloadURL);
+        navigation.goBack();
+      } catch (error) {
+        console.error('Error saving image:', error);
+      }
     }
   };
 
@@ -101,8 +114,8 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5, // Shadow for Android
-    shadowColor: "#000", // Shadow for iOS
+    elevation: 5,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 2,
